@@ -12,14 +12,17 @@ long anVolt, inches, cm;
 int sum=0;//Create sum variable so it can be averaged
 int avgrange=25;//Quantity of values to average (sample size)
 
+int vibrPin = 9;
+
 void setup() {
   //This opens up a serial connection to shoot the results back to the PC console
   Serial.begin(9600);
   Serial.println("Starting");
   Serial.println();
+  pinMode(vibrPin, OUTPUT);
+  pinMode(anPin, INPUT);
 }
 void loop() {
-  pinMode(anPin, INPUT);
   //MaxSonar Analog reads are known to be very sensitive. See the Arduino forum for more information.
   //A simple fix is to average out a sample of n readings to get a more consistant reading.\\ 
   //Even with averaging I still find it to be less accurate than the pw method.\\ 
@@ -37,11 +40,19 @@ void loop() {
   int time = millis();
   inches = sum/avgrange;
   Serial.print(inches);
+  inches = inches - 100;
   Serial.print("in, ");
-  Serial.print("time: ");
-  Serial.print(time);
   Serial.println();
+  if(inches <= 48) {
+    analogWrite(vibrPin, (inches * 4.16 * -1) + 255 ); //4.16 taken from 200 / 48
+    delay(2000); //2 secs is enough time to notify them
+    //analogWrite(vibrPin, 0);
+  }
+  else {
+    analogWrite(vibrPin, 0);
+  }
   //reset sample total
   sum = 0;
   delay(500);
+  
 }
